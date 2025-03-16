@@ -1,19 +1,31 @@
-import { defineNuxtModule, addPlugin, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addPlugin, addImportsDir, createResolver } from '@nuxt/kit'
+import defu from 'defu'
 
-// Module options TypeScript interface definition
-export interface ModuleOptions {}
-
-export default defineNuxtModule<ModuleOptions>({
+export default defineNuxtModule({
   meta: {
-    name: 'my-module',
-    configKey: 'myModule',
+    name: 'nuxt-vue-validateur',
+    configKey: 'vueValidateur',
+    compatibility: {
+      nuxt: '>=3.16.0',
+    },
   },
-  // Default configuration options of the Nuxt module
-  defaults: {},
+  defaults: {
+    token: '',
+    customValidations: {},
+  },
+
   setup(_options, _nuxt) {
     const resolver = createResolver(import.meta.url)
 
-    // Do not add the extension since the `.ts` will be transpiled to `.mjs` after `npm run prepack`
+    // Fusionar configuración del usuario con los defaults
+    const moduleOptions = defu(_nuxt.options.runtimeConfig.public.vueValidateur || {}, _options)
+
+    // Guardar la configuración en `runtimeConfig.public` para que sea accesible en cliente
+    _nuxt.options.runtimeConfig.public.vueValidateur = moduleOptions
+
+    // console.log('Configuración final del módulo:', _nuxt.options.runtimeConfig.public.vueValidateur)
+
     addPlugin(resolver.resolve('./runtime/plugin'))
+    addImportsDir(resolver.resolve('./runtime/composables'))
   },
 })

@@ -1,7 +1,10 @@
 import { reactive } from 'vue'
-import type { ValidationRule } from './validateurTypes'
+import type { ValidationRule } from './types'
+import { useNuxtApp } from '#app'
 
 export const useValidations = () => {
+  const { $customRules } = useNuxtApp() as ValidationRule
+
   const validationRules: ValidationRule = reactive({
     required: (value: unknown) => {
       return {
@@ -47,10 +50,10 @@ export const useValidations = () => {
         message: `El valor debe ser mayor o igual a ${args[0]}`,
       }
     },
+    ...$customRules,
   })
 
   return {
     validationRules,
-    // extendValidations
   }
 }

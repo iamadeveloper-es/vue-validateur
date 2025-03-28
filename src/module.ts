@@ -1,4 +1,4 @@
-import { defineNuxtModule, addPlugin, addImportsDir, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addImportsDir, createResolver } from '@nuxt/kit'
 import defu from 'defu'
 
 export default defineNuxtModule({
@@ -10,8 +10,7 @@ export default defineNuxtModule({
     },
   },
   defaults: {
-    token: '',
-    customValidations: {},
+    vueValidateur: {},
   },
 
   setup(_options, _nuxt) {
@@ -25,7 +24,6 @@ export default defineNuxtModule({
 
     // console.log('Configuración final del módulo:', _nuxt.options.runtimeConfig.public.vueValidateur)
 
-    addPlugin(resolver.resolve('./runtime/plugin'))
     addImportsDir(resolver.resolve('./runtime/composables'))
   },
 })

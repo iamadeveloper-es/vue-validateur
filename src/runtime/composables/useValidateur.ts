@@ -1,6 +1,6 @@
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useValidations } from './useValidations'
-import type { FormSchema, ValidateurOptions, ValidationMode, ValidationResult } from './validateurTypes'
+import type { FormSchema, ValidateurOptions, ValidationMode, ValidationResult } from './types'
 import { useRuntimeConfig } from '#app'
 
 export const useValidateur = () => {
@@ -10,26 +10,20 @@ export const useValidateur = () => {
 
   const { validationRules } = useValidations()
 
-  // const extendedValidations = {
-  //   ...validationRules,
-  //   ...$vValidateur.customValidations,
-  // }
-
   const formToValidate = ref<HTMLFormElement | null>(null)
+  const formRef = ref<HTMLElement | null>(null)
   let formSchema: FormSchema | object = reactive({})
   const formErrorsSchema = reactive(new Map())
   const validationMode = ref('')
-  const validations = ref(validationRules)
 
   const isFormValid = computed(() => formErrorsSchema.size === 0)
   const validationErrors = computed(() => Object.fromEntries(formErrorsSchema))
 
   const createValidateur = (el: HTMLFormElement, schema: FormSchema, options?: ValidateurOptions) => {
-    formToValidate.value = el
+    formToValidate.value = el || formElement
     formSchema = schema
 
     validationMode.value = options?.mode || 'onSubmit'
-    validations.value = { ...validationRules, ...options?.customValidations }
 
     if (validationMode.value === 'instant') {
       instantValidation()
@@ -68,7 +62,7 @@ export const useValidateur = () => {
     const validationsStatus: ValidationResult[] = []
     field.validations.forEach((rule: string) => {
       const formatedRules = parseRule(rule)
-      validationsStatus.push(validations.value[formatedRules.rule](value, formatedRules.args))
+      validationsStatus.push(validationRules[formatedRules.rule](value, formatedRules.args))
     })
 
     checkValidity(key, validationsStatus)
@@ -97,18 +91,25 @@ export const useValidateur = () => {
   const scrollToField = (fieldName: string) => {
     const inputField = formToValidate.value?.value?.querySelector(`input[name="${fieldName}"]`) as HTMLInputElement
     nextTick(() => {
-      inputField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      inputField?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       // inputField.focus();
-      setTimeout(() => {
-        inputField.focus()
-      }, 300)
+      // setTimeout(() => {
+      //   inputField.focus()
+      // }, 300)
     })
   }
+
+  onMounted(() => {
+    if (formRef.value) {
+      debugger
+    }
+  })
 
   return {
     createValidateur,
     validate,
     isFormValid,
     validationErrors,
+    formRef,
   }
 }

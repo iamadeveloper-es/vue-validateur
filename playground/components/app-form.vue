@@ -1,12 +1,21 @@
 <script lang="ts" setup>
-import { customValidations } from '~/customValidations'
-
+// Se definen las referencias
 const formOne = ref<HTMLFormElement | null>(null)
 const formTwo = ref<HTMLFormElement | null>(null)
+const formThree = ref<HTMLFormElement | null>(null)
+
+// Asignación de composable para diferentes formularios
 const { createValidateur, validate, validationErrors } = useValidateur()
 const formTwoValidateur = useValidateur()
+const formThreeValidateur = useValidateur()
+
+const {
+  createValidateur: createValidateurThree,
+  validate: validateThree,
+  validationErrors: validationErrorsThree } = formThreeValidateur
+
 const validationErrorsV2 = formTwoValidateur.validationErrors
-console.log(useRuntimeConfig().public.vValidateur)
+
 const formSchema = reactive({
   userName: {
     value: '',
@@ -37,6 +46,21 @@ const formSchemaV2 = reactive({
   },
 })
 
+const formSchemaV3 = reactive({
+  userName: {
+    value: '',
+    validations: ['required', 'minLength:3,4', 'alphaNumeric'],
+  },
+  email: {
+    value: '',
+    validations: ['required', 'email'],
+  },
+  pass: {
+    value: '',
+    validations: ['required'],
+  },
+})
+
 const onSubmit = () => {
   validate()
 }
@@ -45,12 +69,19 @@ const onSubmitV2 = () => {
   formTwoValidateur.validate()
 }
 
+const onSubmitV3 = () => {
+  validateThree()
+}
+
 onMounted(() => {
   createValidateur(formOne, formSchema, {
     mode: 'instantOnSubmit',
-    customValidations,
   })
   formTwoValidateur.createValidateur(formTwo, formSchemaV2, {
+    mode: 'instant',
+  })
+
+  createValidateurThree(formThree, formSchemaV3, {
     mode: 'instant',
   })
 })
@@ -131,6 +162,45 @@ onMounted(() => {
           name="pass2"
         >
         <span v-if="validationErrorsV2.pass">{{ validationErrorsV2.pass }}</span>
+      </div>
+      <button type="submit">
+        Send
+      </button>
+    </form>
+    <!--  -->
+    <form
+      ref="formThree"
+      @submit.prevent="onSubmitV3"
+    >
+      <div>
+        <label for="userName3">User Name</label>
+        <input
+          id="userName3"
+          v-model="formSchemaV3.userName.value"
+          type="text"
+          name="userName3"
+        >
+        <span v-if="validationErrorsThree.userName">{{ validationErrorsThree.userName }}</span>
+      </div>
+      <div>
+        <label for="email3">Email</label>
+        <input
+          id="email3"
+          v-model="formSchemaV3.email.value"
+          type="text"
+          name="email3"
+        >
+        <span v-if="validationErrorsThree.email">{{ validationErrorsThree.email }}</span>
+      </div>
+      <div>
+        <label for="pass3">Password</label>
+        <input
+          id="pass3"
+          v-model="formSchemaV3.pass.value"
+          type="password"
+          name="pass3"
+        >
+        <span v-if="validationErrorsThree.pass">{{ validationErrorsThree.pass }}</span>
       </div>
       <button type="submit">
         Send
